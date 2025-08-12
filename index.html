@@ -1,0 +1,1152 @@
+import React, { useState, useEffect } from 'react';
+import { Play, Pause, RotateCcw, ChevronRight, ChevronLeft, Clock, User, Target, AlertCircle, CheckCircle, PlayCircle } from 'lucide-react';
+
+const IyengarYogaApp = () => {
+  const [currentStage, setCurrentStage] = useState(1);
+  const [currentSession, setCurrentSession] = useState(null);
+  const [currentPose, setCurrentPose] = useState(0);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [timeElapsed, setTimeElapsed] = useState(0);
+  const [selectedPose, setSelectedPose] = useState(null);
+  const [sessionInProgress, setSessionInProgress] = useState(false);
+
+  const stages = {
+    1: {
+      title: "שלב 1: יסודות והכנה",
+      duration: "20 דקות",
+      frequency: "3 פעמים בשבוע",
+      weeks: "שבועות 1-4",
+      focus: "בניית מודעות גופנית ויסודות יציבה",
+      session: {
+        title: "סשן יסודות - בניית חיבור לגוף",
+        totalDuration: "20 דקות",
+        theme: "מודעות, יציבה ויציבות פנימית",
+        sequence: [
+          {
+            phase: "פתיחה ומרכוז",
+            duration: "3 דקות",
+            poses: [
+              {
+                name: "ישיבה שקטה - Sukhasana",
+                hebrewName: "סוקהאסנה - ישיבה נוחה",
+                duration: "2 דקות",
+                purpose: "מרכוז והכנת המודעות",
+                instructions: [
+                  "שב בישיבה נוחה על כרית עם עמוד השדרה זקוף",
+                  "הנח את הידיים על הברכיים",
+                  "סגור את העיניים ונשום עמוק 10 נשימות",
+                  "הכוון את המודעות פנימה וקבע כוונה לתרגול"
+                ]
+              },
+              {
+                name: "נשימת הכנה - Dirga Pranayama",
+                hebrewName: "דירגה פראנאיאמה",
+                duration: "1 דקה",
+                purpose: "הכנת מערכת הנשימה",
+                instructions: [
+                  "נשום אל הבטן, הצלעות והחזה",
+                  "שאיפה איטית ל-4 ספירות",
+                  "נשיפה איטית ל-6 ספירות"
+                ]
+              }
+            ]
+          },
+          {
+            phase: "חימום עדין",
+            duration: "4 דקות",
+            poses: [
+              {
+                name: "תנועות צוואר ועמוד שדרה",
+                duration: "2 דקות",
+                purpose: "חימום עדין של עמוד השדרה",
+                instructions: [
+                  "סיבובי צוואר עדינים 5 לכל כיוון",
+                  "סיבובי כתפיים 8 אחורה",
+                  "סיבוב עמוד שדרה בישיבה לכל צד 30 שניות"
+                ]
+              },
+              {
+                name: "Marjaryasana-Bitilasana - חתול-פרה",
+                hebrewName: "מארג'ריאסנה-ביטילאסנה",
+                duration: "2 דקות",
+                purpose: "חימום גמישות עמוד השדרה",
+                instructions: [
+                  "עמוד על ארבע",
+                  "עיגול הגב כלפי מעלה - נשיפה",
+                  "קשת הגב כלפי מטה - שאיפה",
+                  "8-10 חזרות איטיות"
+                ]
+              }
+            ]
+          },
+          {
+            phase: "יסודות עמידה",
+            duration: "8 דקות",
+            poses: [
+              {
+                name: "Tadasana - עמידת הר",
+                hebrewName: "תדאסנה",
+                duration: "3 דקות",
+                purpose: "בניית מודעות ליציבה הבסיסית",
+                instructions: [
+                  "עמוד זקוף עם כפות הרגליים במקביל",
+                  "הפזר את המשקל באופן שווה",
+                  "הדק את שרירי הירכיים והרם את פיקת הברכיים",
+                  "מתח את עמוד השדרה כלפי מעלה",
+                  "נשום עמוק והרגש את ההשתרשות"
+                ],
+                benefits: ["יציבה נכונה", "חיזוק שרירי ליבה", "מודעות לגוף"],
+                alignment: [
+                  "קו אחד: קרסול-ברך-ירך",
+                  "עקומה טבעית במותניים",
+                  "חזה מורם בעדינות",
+                  "כתפיים רחוק מהאוזניים"
+                ]
+              },
+              {
+                name: "Vrksasana - עמידת העץ",
+                hebrewName: "וריקשאסנה",
+                duration: "2 דקות (1 דקה כל רגל)",
+                purpose: "פיתוח איזון ויציבות",
+                instructions: [
+                  "התחל בתדאסנה",
+                  "העבר משקל לרגל שמאל",
+                  "הנח כף הרגל ימין על השוק הפנימית",
+                  "הנח ידיים בתנוחת תפילה",
+                  "מצא נקודת מיקוד והישאר יציב"
+                ],
+                benefits: ["שיפור איזון", "חיזוק רגל עומדת", "ריכוז מנטלי"]
+              },
+              {
+                name: "Adho Mukha Svanasana - כלב פונה מטה",
+                hebrewName: "אדהו מוקה שוואנאסנה",
+                duration: "3 דקות (3 חזרות של 45 שניות + מנוחה)",
+                purpose: "חיזוק זרועות ומתיחת עמוד השדרה",
+                instructions: [
+                  "התחל על ארבע",
+                  "קפל בהונות והרם ברכיים",
+                  "יישר רגליים ודחף ידיים",
+                  "צור צורת V הפוכה",
+                  "נשום עמוק 5 נשימות, מנוחה בעמידת הילד"
+                ],
+                benefits: ["מתיחת עמוד השדרה", "חיזוק זרועות וכתפיים"]
+              }
+            ]
+          },
+          {
+            phase: "רגיעה ואינטגרציה",
+            duration: "5 דקות",
+            poses: [
+              {
+                name: "Balasana - עמידת הילד",
+                hebrewName: "באלאסנה",
+                duration: "2 דקות",
+                purpose: "הרגעה ושחרור מתח",
+                instructions: [
+                  "כרע על ברכיים",
+                  "שב על עקבים",
+                  "כפף קדימה והנח מצח על רצפה",
+                  "זרועות לצדדים, כפות ידיים כלפי מעלה",
+                  "נשום עמוק והרגש שחרור"
+                ]
+              },
+              {
+                name: "Savasana - תנוחת המת",
+                hebrewName: "שוואסנה",
+                duration: "3 דקות",
+                purpose: "אינטגרציה ושחרור מלא",
+                instructions: [
+                  "שכב על גב עם רגליים מעט פתוחות",
+                  "זרועות לצדדים, כפות ידיים כלפי מעלה",
+                  "סגור עיניים והרפה כל חלק בגוף",
+                  "נשום טבעי ללא שליטה",
+                  "הישאר מודע ורגוע"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    2: {
+      title: "שלב 2: בניית בסיס",
+      duration: "30 דקות",
+      frequency: "3-4 פעמים בשבוע",
+      weeks: "שבועות 5-8",
+      focus: "פיתוח כוח, גמישות ותנוחות עמידה בסיסיות",
+      session: {
+        title: "סשן בניית בסיס - כוח ויציבות",
+        totalDuration: "30 דקות",
+        theme: "חיזוק הרגליים ופיתוח תנוחות עמידה יסודיות",
+        sequence: [
+          {
+            phase: "פתיחה ומרכוז",
+            duration: "3 דקות",
+            poses: [
+              {
+                name: "Sukhasana עם נשימה מודעת",
+                duration: "3 דקות",
+                purpose: "מרכוז והכנה מנטלית",
+                instructions: [
+                  "ישיבה נוחה עם עמוד שדרה זקוף",
+                  "10 נשימות עמוקות לבטן",
+                  "10 נשימות לחזה",
+                  "קביעת כוונה לתרגול חזק ויציב"
+                ]
+              }
+            ]
+          },
+          {
+            phase: "חימום דינמי",
+            duration: "5 דקות",
+            poses: [
+              {
+                name: "Surya Namaskara A - בסיסי",
+                duration: "3 דקות",
+                purpose: "חימום כל הגוף",
+                instructions: [
+                  "תדאסנה - הרמת ידיים",
+                  "אוטנאסנה - כפיפה קדימה",
+                  "חצי הרמה - ידיים על שוקיים",
+                  "כלב פונה מטה - 5 נשימות",
+                  "חזרה לתדאסנה | 3 סיבובים"
+                ]
+              },
+              {
+                name: "תנועות הכנה לירכיים",
+                duration: "2 דקות",
+                purpose: "הכנת מפרקי הירכיים",
+                instructions: [
+                  "סיבובי ירך בעמידה 8 לכל כיוון",
+                  "הרמות רגל לצד 5 כל רגל",
+                  "כפיפות ברך לחזה 5 כל רגל"
+                ]
+              }
+            ]
+          },
+          {
+            phase: "תנוחות עמידה יסודיות",
+            duration: "16 דקות",
+            poses: [
+              {
+                name: "Tadasana עמוק",
+                duration: "2 דקות",
+                purpose: "בסיס חזק לכל התנוחות",
+                instructions: [
+                  "עמידה מושלמת עם מודעות לכל חלקי הגוף",
+                  "הפעלת שרירי הרגליים",
+                  "התארכות מקצות האצבעות עד קודקוד",
+                  "נשימה עמוקה ומודעת"
+                ]
+              },
+              {
+                name: "Uttanasana - כפיפה קדימה",
+                duration: "2 דקות",
+                purpose: "מתיחת שרירי הרגל האחוריים והרגעה",
+                instructions: [
+                  "מתדאסנה כפף קדימה מירכיים",
+                  "שמור על גב ישר כמה שאפשר",
+                  "ידיים תלויות או אוחזות במרפקים",
+                  "כפיפת ברכיים קלה אם נדרש"
+                ]
+              },
+              {
+                name: "Trikonasana - משולש",
+                duration: "4 דקות (2 דקות כל צד)",
+                purpose: "חיזוק רגליים ומתיחה צידית",
+                instructions: [
+                  "רוחב רגליים מטר ו-20 ס\"מ",
+                  "סיבוב רגל ימין 90° החוצה",
+                  "סיבוב רגל שמאל 15° פנימה",
+                  "כפיפה צידית עם יד על רגל",
+                  "הארכת יד עליונה לתקרה"
+                ]
+              },
+              {
+                name: "Parsvottanasana - מתיחה צידית עמוקה",
+                duration: "4 דקות (2 דקות כל צד)",
+                purpose: "מתיחה עמוקה ושיפור איזון",
+                instructions: [
+                  "רוחב רגליים מטר",
+                  "סיבוב רגל קדמית 90°",
+                  "כוון ירכיים קדימה",
+                  "כפיפה מירכיים מעל רגל קדמית",
+                  "ידיים על רצפה או בלוקים"
+                ]
+              },
+              {
+                name: "Vrksasana מתקדם",
+                duration: "4 דקות (2 דקות כל רגל)",
+                purpose: "איזון מתקדם וחיזוק מרכז",
+                instructions: [
+                  "עמידת עץ עם הרמת ידיים מעל ראש",
+                  "חזקת איזון ארוכה יותר",
+                  "וריאציות: עיניים עצומות או תנועת ידיים",
+                  "ריכוז מלא ונשימה עמוקה"
+                ]
+              }
+            ]
+          },
+          {
+            phase: "פתיחה והרגעה",
+            duration: "6 דקות",
+            poses: [
+              {
+                name: "Janu Sirsasana - כפיפה אל ברך",
+                duration: "3 דקות (1.5 דקה כל צד)",
+                purpose: "מתיחה עמוקה והרגעת מערכת העצבים",
+                instructions: [
+                  "ישיבה עם רגל אחת ישרה, השנייה כפופה",
+                  "כפיפה קדימה מירכיים",
+                  "נשימה עמוקה ושחרור הדרגתי"
+                ]
+              },
+              {
+                name: "Savasana משולב",
+                duration: "3 דקות",
+                purpose: "אינטגרציה מלאה של התרגול",
+                instructions: [
+                  "שכיבה על גב מלאה",
+                  "סקירת גוף מבהונות לקודקוד",
+                  "שחרור מודע של כל שריר",
+                  "נשימה טבעית ומודעות נוכחת"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    3: {
+      title: "שלב 3: פיתוח והעמקה",
+      duration: "45 דקות",
+      frequency: "4 פעמים בשבוע",
+      weeks: "שבועות 9-16",
+      focus: "תנוחות מורכבות, פיתולים וחיזוק מתקדם",
+      session: {
+        title: "סשן פיתוח - כוח ופיתולים",
+        totalDuration: "45 דקות",
+        theme: "בניית כוח עמוק, גמישות ותנוחות מורכבות",
+        sequence: [
+          {
+            phase: "פתיחה ומרכוז",
+            duration: "5 דקות",
+            poses: [
+              {
+                name: "פראנאיאמה מכינה",
+                duration: "5 דקות",
+                purpose: "הכנת אנרגיה ומרכוז עמוק",
+                instructions: [
+                  "ישיבה על כרית עם גב זקוף",
+                  "Ujjayi Pranayama - 15 נשימות",
+                  "נשימה עמוקה בקצב 6:8 (שאיפה:נשיפה)",
+                  "הכנת הגוף לעבודה עמוקה"
+                ]
+              }
+            ]
+          },
+          {
+            phase: "חימום דינמי מתקדם",
+            duration: "8 דקות",
+            poses: [
+              {
+                name: "Surya Namaskara B",
+                duration: "5 דקות",
+                purpose: "חימום מלא וחיזוק",
+                instructions: [
+                  "סיבוב שלם עם ווירבהדראסנה",
+                  "4 סיבובים מלאים",
+                  "דגש על מעברים חלקים",
+                  "חיזוק כוח ובניית חום גופני"
+                ]
+              },
+              {
+                name: "הכנה לתנוחות לוחם",
+                duration: "3 דקות",
+                purpose: "חימום מפרקי הירכיים והכנה לכוח",
+                instructions: [
+                  "Low lunge דינמי - 5 כל צד",
+                  "סיבובי ירך בלאנג' - 8 כל צד",
+                  "הכנות לפתיחת ירכיים"
+                ]
+              }
+            ]
+          },
+          {
+            phase: "תנוחות לוחם ועמידה מתקדמת",
+            duration: "20 דקות",
+            poses: [
+              {
+                name: "Virabhadrasana I - לוחם 1",
+                duration: "4 דקות (2 דקות כל צד)",
+                purpose: "חיזוק רגליים וליבה, פתיחת ירכיים",
+                instructions: [
+                  "צעד גדול אחורה מתדאסנה",
+                  "כפיפת ברך קדמית 90°",
+                  "הרמת ידיים מעל ראש",
+                  "חיזוק מלא והארכת עמוד שדרה"
+                ]
+              },
+              {
+                name: "Virabhadrasana II - לוחם 2",
+                duration: "4 דקות (2 דקות כל צד)",
+                purpose: "סיבולת וחיזוק רגליים",
+                instructions: [
+                  "פתיחת ירכיים לצד",
+                  "זרועות פרושות בגובה כתפיים",
+                  "מבט מעל יד קדמית",
+                  "שמירה על חוזק וזרימה"
+                ]
+              },
+              {
+                name: "Utthita Parsvakonasana - זווית צידית",
+                duration: "4 דקות (2 דקות כל צד)",
+                purpose: "מתיחה צידית עמוקה",
+                instructions: [
+                  "מתוך לוחם 2",
+                  "מרפק על ירך או יד לרצפה",
+                  "זרוע עליונה מעל ראש",
+                  "קו אחד מכף רגל לכף יד"
+                ]
+              },
+              {
+                name: "Trikonasana עמוק",
+                duration: "4 דקות (2 דקות כל צד)",
+                purpose: "מתיחה צידית ושיפור איזון",
+                instructions: [
+                  "משולש עם מודעות עמוקה",
+                  "חיזוק רגל אחורית",
+                  "פתיחת חזה מלאה",
+                  "איזון מושלם"
+                ]
+              },
+              {
+                name: "Parsvottanasana מעמיק",
+                duration: "4 דקות (2 דקות כל צד)",
+                purpose: "מתיחה עמוקה ואיזון",
+                instructions: [
+                  "כפיפה עמוקה מירכיים",
+                  "ידיים לרצפה או בלוקים",
+                  "גב ישר והארכה מלאה",
+                  "נשימה עמוקה בקושי"
+                ]
+              }
+            ]
+          },
+          {
+            phase: "תנוחות ישיבה ופיתולים",
+            duration: "8 דקות",
+            poses: [
+              {
+                name: "Paschimottanasana - כפיפה קדימה בישיבה",
+                duration: "3 דקות",
+                purpose: "מתיחה עמוקה והרגעה",
+                instructions: [
+                  "ישיבה עם רגליים ישרות",
+                  "כפיפה איטית מירכיים",
+                  "הגעה לכפות רגליים או שוקיים",
+                  "נשימה עמוקה ושחרור"
+                ]
+              },
+              {
+                name: "Marichyasana I - פיתול מריצ'י",
+                duration: "3 דקות (1.5 דקה כל צד)",
+                purpose: "פיתול עמוד שדרה ושיפור עיכול",
+                instructions: [
+                  "רגל אחת ישרה, השנייה כפופה",
+                  "כפיפה וסיבוב משולב",
+                  "אחיזה מאחורי גב אם אפשר",
+                  "פיתול מבוקר ועמוק"
+                ]
+              },
+              {
+                name: "Bharadvajasana - פיתול בישיבה",
+                duration: "2 דקות (1 דקה כל צד)",
+                purpose: "ניידות עמוד שדרה",
+                instructions: [
+                  "ישיבה עם רגליים לצד",
+                  "פיתול עדין של עמוד שדרה",
+                  "יד אחורית לתמיכה",
+                  "סיבוב מדוד ומבוקר"
+                ]
+              }
+            ]
+          },
+          {
+            phase: "רגיעה ואינטגרציה",
+            duration: "4 דקות",
+            poses: [
+              {
+                name: "Balasana מורחב",
+                duration: "1 דקה",
+                purpose: "שחרור ראשוני",
+                instructions: [
+                  "עמידת ילד עם זרועות פרושות",
+                  "נשימה לגב התחתון",
+                  "שחרור מתח מהתרגול"
+                ]
+              },
+              {
+                name: "Savasana מלא",
+                duration: "3 דקות",
+                purpose: "אינטגרציה עמוקה",
+                instructions: [
+                  "שכיבה מלאה על גב",
+                  "סקירת גוף מפורטת",
+                  "שחרור שכבה אחר שכבה",
+                  "מודעות למרחב פנימי שנוצר"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    4: {
+      title: "שלב 4: עומק ושלמות",
+      duration: "60 דקות",
+      frequency: "4-5 פעמים בשבוע", 
+      weeks: "שבועות 17-24",
+      focus: "הפיכות, פיתחי גב מתקדמים ותרגול מושלם",
+      session: {
+        title: "סשן מאסטר - תרגול מושלם",
+        totalDuration: "60 דקות",
+        theme: "אינטגרציה של כל הטכניקות לתרגול מתקדם ומושלם",
+        sequence: [
+          {
+            phase: "פתיחה מודעת",
+            duration: "8 דקות",
+            poses: [
+              {
+                name: "ישיבה מדיטטיבית + פראנאיאמה",
+                duration: "8 דקות",
+                purpose: "מרכוז עמוק והכנה לתרגול מתקדם",
+                instructions: [
+                  "ישיבה מושלמת עם גב זקוף (2 דקות)",
+                  "Nadi Shodhana - נשימה מתחלפת (3 דקות)",
+                  "Ujjayi Pranayama עמוק (3 דקות)",
+                  "קביעת כוונה לתרגול מושלם"
+                ]
+              }
+            ]
+          },
+          {
+            phase: "חימום מתקדם ובניית חום",
+            duration: "12 דקות",
+            poses: [
+              {
+                name: "Surya Namaskara מתקדם",
+                duration: "8 דקות",
+                purpose: "חימום מלא ובניית כוח",
+                instructions: [
+                  "6 סיבובי Surya A + B משולבים",
+                  "מעברים חלקים ומודעים",
+                  "בניית חום פנימי",
+                  "הכנה לתנוחות מתקדמות"
+                ]
+              },
+              {
+                name: "הכנות לחיזוק כתפיים",
+                duration: "4 דקות",
+                purpose: "הכנה לתנוחות הפיכה",
+                instructions: [
+                  "Dolphin Prep - 1 דקה",
+                  "Plank variations - 2 דקות",
+                  "כוח כתפיים וליבה - 1 דקה"
+                ]
+              }
+            ]
+          },
+          {
+            phase: "תנוחות עמידה מאתגרות",
+            duration: "15 דקות",
+            poses: [
+              {
+                name: "רצף לוחמים מלא",
+                duration: "8 דקות",
+                purpose: "חיזוק מלא וסיבולת",
+                instructions: [
+                  "Virabhadrasana I → II → Parsvakonasana",
+                  "זרימה חלקה בין התנוחות",
+                  "2 דקות כל צד במחזור",
+                  "דגש על נשימה ויציבות"
+                ]
+              },
+              {
+                name: "איזון מתקדם",
+                duration: "4 דקות",
+                purpose: "ריכוז ושליטה מלאה",
+                instructions: [
+                  "Utthita Hasta Padangusthasana - 2 דקות",
+                  "וריאציות איזון מאתגרות - 2 דקות"
+                ]
+              },
+              {
+                name: "תנוחות עמידה עמוקות",
+                duration: "3 דקות",
+                purpose: "מתיחה עמוקה ופתיחה",
+                instructions: [
+                  "Parsvottanasana עמוק",
+                  "מתיחה מקסימלית",
+                  "נשימה עמוקה בעומק"
+                ]
+              }
+            ]
+          },
+          {
+            phase: "פיתחי גב והפיכות",
+            duration: "15 דקות",
+            poses: [
+              {
+                name: "הכנה לגשר מלא",
+                duration: "3 דקות",
+                purpose: "פתיחת חזה והכנת כתפיים",
+                instructions: [
+                  "Setu Bandhasana - 1 דקה",
+                  "Camel prep - פתיחת כתפיים - 1 דקה",
+                  "Bridge variations - 1 דקה"
+                ]
+              },
+              {
+                name: "Urdhva Dhanurasana - גשר מלא",
+                duration: "5 דקות",
+                purpose: "פתיחת חזה עמוקה וחיזוק גב",
+                instructions: [
+                  "3 חזרות של 45 שניות כל אחת",
+                  "מנוחה בעמידת ילד בין החזרות",
+                  "דגש על פתיחת חזה ולא לחיצת מותניים",
+                  "נשימה עמוקה בקושי"
+                ]
+              },
+              {
+                name: "מעבר להפיכות",
+                duration: "2 דקות",
+                purpose: "הכנה לשינוי כיוון הגוף",
+                instructions: [
+                  "רגליים על קיר - 1 דקה",
+                  "הכנה לסרוונגאסנה - 1 דקה"
+                ]
+              },
+              {
+                name: "Sarvangasana - תנוחת הנר",
+                duration: "5 דקות",
+                purpose: "הפיכה עמוקה והרגעת מערכת העצבים",
+                instructions: [
+                  "עליה מבוקרת לתנוחת הנר",
+                  "שמירה על המשקל בכתפיים",
+                  "נשימה עמוקה ומבוקרת",
+                  "חזקת התנוחה 3-5 דקות"
+                ]
+              }
+            ]
+          },
+          {
+            phase: "תנוחות ישיבה עמוקות",
+            duration: "8 דקות",
+            poses: [
+              {
+                name: "Halasana - מחרשה",
+                duration: "2 דקות",
+                purpose: "המשך ההפיכה ומתיחת צוואר",
+                instructions: [
+                  "מתוך סרוונגאסנה",
+                  "הורדת רגליים מאחורי ראש",
+                  "נשימה חופשית",
+                  "מתיחה עמוקה של עמוד השדרה"
+                ]
+              },
+              {
+                name: "מעבר לישיבה",
+                duration: "1 דקה",
+                purpose: "חזרה בטוחה לתנוחות ישיבה",
+                instructions: [
+                  "ירידה איטית מההפיכה",
+                  "מנוחה קצרה על גב",
+                  "מעבר עדין לישיבה"
+                ]
+              },
+              {
+                name: "Paschimottanasana עמוק",
+                duration: "3 דקות",
+                purpose: "מתיחה עמוקה והרגעה",
+                instructions: [
+                  "כפיפה איטית ומבוקרת",
+                  "נשימה לגב התחתון",
+                  "כניסה עמוקה לתוך התנוחה",
+                  "שחרור ציפיות"
+                ]
+              },
+              {
+                name: "פיתולים עמוקים",
+                duration: "2 דקות",
+                purpose: "איזון עמוד השדרה",
+                instructions: [
+                  "Bharadvajasana - 1 דקה כל צד",
+                  "פיתול עדין ומבוקר",
+                  "אינטגרציה של התרגול"
+                ]
+              }
+            ]
+          },
+          {
+            phase: "רגיעה מלאה ואינטגרציה",
+            duration: "12 דקות",
+            poses: [
+              {
+                name: "Balasana מורחב",
+                duration: "3 דקות",
+                purpose: "שחרור ראשוני ומעבר לרגיעה",
+                instructions: [
+                  "עמידת ילד עם זרועות רחבות",
+                  "נשימה לכל חלקי הגב",
+                  "הרגשת השינויים שהתרחשו בגוף",
+                  "הכנה לשוואסנה"
+                ]
+              },
+              {
+                name: "Savasana מלא ומעמיק",
+                duration: "8 דקות",
+                purpose: "אינטגרציה מלאה של התרגול",
+                instructions: [
+                  "שכיבה מושלמת על גב",
+                  "סקירת גוף מפורטת - 2 דקות",
+                  "שחרור מודע של כל מתח - 3 דקות",
+                  "מודעות למרחב שנוצר - 2 דקות",
+                  "התעוררות עדינה - 1 דקה"
+                ]
+              },
+              {
+                name: "סיום בישיבה",
+                duration: "1 דקה",
+                purpose: "חתימה על התרגול",
+                instructions: [
+                  "ישיבה שקטה עם עיניים עצומות",
+                  "הכרת תודה לגוף ולתרגול",
+                  "הכוונת האנרגיה לשארית היום"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  };
+
+  useEffect(() => {
+    let interval;
+    if (isTimerRunning) {
+      interval = setInterval(() => {
+        setTimeElapsed(prev => prev + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isTimerRunning]);
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const resetTimer = () => {
+    setTimeElapsed(0);
+    setIsTimerRunning(false);
+  };
+
+  const SessionView = ({ session }) => (
+    <div className="bg-white p-6 rounded-lg shadow-lg" dir="rtl">
+      <div className="mb-6 text-center">
+        <h2 className="text-3xl font-bold text-blue-800 mb-2">{session.title}</h2>
+        <div className="flex justify-center gap-4 mb-4">
+          <span className="bg-blue-100 px-4 py-2 rounded-full font-bold text-blue-800">
+            {session.totalDuration}
+          </span>
+          <span className="bg-purple-100 px-4 py-2 rounded-full font-bold text-purple-800">
+            {session.theme}
+          </span>
+        </div>
+      </div>
+
+      {session.sequence.map((phase, phaseIdx) => (
+        <div key={phaseIdx} className="mb-8 border-r-4 border-blue-500 pr-6">
+          <div className="mb-4">
+            <h3 className="text-2xl font-bold text-blue-700 mb-2">{phase.phase}</h3>
+            <span className="bg-green-100 px-3 py-1 rounded-full text-green-800 font-bold">
+              {phase.duration}
+            </span>
+          </div>
+
+          <div className="space-y-4">
+            {phase.poses.map((pose, poseIdx) => (
+              <div key={poseIdx} className="bg-gray-50 p-4 rounded-lg border-r-2 border-gray-300">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h4 className="text-xl font-bold text-gray-800">{pose.name}</h4>
+                    {pose.hebrewName && (
+                      <p className="text-sm text-gray-600">{pose.hebrewName}</p>
+                    )}
+                  </div>
+                  <div className="text-left">
+                    <span className="bg-yellow-100 px-3 py-1 rounded-full text-yellow-800 text-sm font-bold">
+                      {pose.duration}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mb-3">
+                  <h5 className="font-bold text-green-700 mb-1">מטרה:</h5>
+                  <p className="text-gray-700 text-sm">{pose.purpose}</p>
+                </div>
+
+                <div>
+                  <h5 className="font-bold text-blue-700 mb-2">הוראות ביצוע:</h5>
+                  <ul className="space-y-1">
+                    {pose.instructions.map((instruction, instIdx) => (
+                      <li key={instIdx} className="flex gap-3 text-sm">
+                        <span className="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                          {instIdx + 1}
+                        </span>
+                        <span className="text-gray-700">{instruction}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {pose.benefits && (
+                  <div className="mt-3">
+                    <h5 className="font-bold text-purple-700 mb-1">יתרונות:</h5>
+                    <div className="flex flex-wrap gap-2">
+                      {pose.benefits.map((benefit, benIdx) => (
+                        <span key={benIdx} className="bg-purple-100 px-2 py-1 rounded text-xs text-purple-800">
+                          {benefit}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {pose.alignment && (
+                  <div className="mt-3">
+                    <h5 className="font-bold text-orange-700 mb-1">נקודות יישור:</h5>
+                    <ul className="text-xs space-y-1">
+                      {pose.alignment.map((align, alignIdx) => (
+                        <li key={alignIdx} className="flex gap-2">
+                          <span className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-1.5 flex-shrink-0"></span>
+                          <span className="text-gray-600">{align}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {/* Session Timer */}
+      <div className="mt-8 bg-gradient-to-r from-blue-100 to-purple-100 p-6 rounded-lg">
+        <h3 className="text-xl font-bold text-center mb-4">טיימר הסשן</h3>
+        <div className="flex items-center justify-center gap-6">
+          <div className="text-4xl font-mono bg-white px-6 py-3 rounded-lg border-2">
+            {formatTime(timeElapsed)}
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setIsTimerRunning(!isTimerRunning)}
+              className={`p-3 rounded-lg text-white font-bold text-lg ${
+                isTimerRunning ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
+              } transition-colors`}
+            >
+              {isTimerRunning ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
+            </button>
+            <button
+              onClick={resetTimer}
+              className="p-3 rounded-lg bg-gray-500 hover:bg-gray-600 text-white transition-colors"
+            >
+              <RotateCcw className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+        <p className="text-center mt-4 text-gray-600">
+          משך זמן מומלץ: <strong>{session.totalDuration}</strong>
+        </p>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4" dir="rtl">
+      <div className="max-w-6xl mx-auto">
+        <header className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-blue-800 mb-2">יוגה איינגר - סשנים הוליסטיים</h1>
+          <p className="text-gray-600">תרגול מעגלי ושלם עם היגיון פנימי לכל שלב</p>
+        </header>
+
+        {/* Stage Selector */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-4 text-center">בחר שלב לתרגול</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {Object.entries(stages).map(([stageNum, stage]) => (
+              <button
+                key={stageNum}
+                onClick={() => {
+                  setCurrentStage(parseInt(stageNum));
+                  setCurrentSession(null);
+                  setSessionInProgress(false);
+                }}
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  currentStage === parseInt(stageNum)
+                    ? 'border-blue-500 bg-blue-50 shadow-lg'
+                    : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'
+                }`}
+              >
+                <h3 className="font-bold text-lg text-blue-800">{stage.title}</h3>
+                <p className="text-sm text-gray-600 mt-1">{stage.weeks}</p>
+                <p className="text-sm text-gray-600">{stage.duration}</p>
+                <p className="text-xs text-purple-600 mt-2 font-medium">{stage.focus}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Current Stage Overview */}
+        <div className="bg-white p-6 rounded-lg shadow-lg mb-8">
+          <h2 className="text-2xl font-bold text-blue-800 mb-4">{stages[currentStage].title}</h2>
+          <div className="grid md:grid-cols-4 gap-4 mb-4">
+            <div className="bg-blue-50 p-4 rounded-lg text-center">
+              <h3 className="font-bold text-blue-800">משך זמן</h3>
+              <p className="text-blue-600">{stages[currentStage].duration}</p>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg text-center">
+              <h3 className="font-bold text-green-800">תדירות</h3>
+              <p className="text-green-600">{stages[currentStage].frequency}</p>
+            </div>
+            <div className="bg-purple-50 p-4 rounded-lg text-center">
+              <h3 className="font-bold text-purple-800">תקופה</h3>
+              <p className="text-purple-600">{stages[currentStage].weeks}</p>
+            </div>
+            <div className="bg-orange-50 p-4 rounded-lg text-center">
+              <h3 className="font-bold text-orange-800">מיקוד</h3>
+              <p className="text-orange-600 text-sm">{stages[currentStage].focus}</p>
+            </div>
+          </div>
+          
+          <div className="text-center">
+            <button
+              onClick={() => {
+                setCurrentSession(stages[currentStage].session);
+                setSessionInProgress(true);
+                resetTimer();
+              }}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-bold text-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg flex items-center gap-3 mx-auto"
+            >
+              <PlayCircle className="w-6 h-6" />
+              התחל סשן {stages[currentStage].title}
+            </button>
+          </div>
+        </div>
+
+        {/* Session Display */}
+        {currentSession && sessionInProgress && (
+          <SessionView session={currentSession} />
+        )}
+
+        {/* Timing Guide */}
+        {!sessionInProgress && (
+          <div className="bg-gradient-to-r from-green-100 to-blue-100 p-6 rounded-lg shadow-lg mb-8">
+            <h2 className="text-2xl font-bold mb-6 text-center text-green-800">🕐 מתי מומלץ לתרגל?</h2>
+            
+            <div className="grid md:grid-cols-2 gap-8 mb-6">
+              <div className="bg-white p-5 rounded-lg shadow-md">
+                <h3 className="font-bold text-xl mb-4 text-orange-700">⏰ זמנים אופטימליים ביום:</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg">
+                    <span className="text-2xl">🌅</span>
+                    <div>
+                      <strong className="text-orange-800">בוקר מוקדם (6:00-8:00)</strong>
+                      <p className="text-sm text-gray-600">הכי מומלץ! הגוף גמיש יותר, המוח שקט</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg">
+                    <span className="text-2xl">🌤️</span>
+                    <div>
+                      <strong className="text-yellow-700">סוף בוקר (9:00-11:00)</strong>
+                      <p className="text-sm text-gray-600">טוב למתחילים, אחרי קפה קל</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                    <span className="text-2xl">🌅</span>
+                    <div>
+                      <strong className="text-blue-700">ערב מוקדם (17:00-19:00)</strong>
+                      <p className="text-sm text-gray-600">מושלם לשחרור מתחי היום</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
+                    <span className="text-2xl">🌙</span>
+                    <div>
+                      <strong className="text-purple-700">לילה (20:00-21:00)</strong>
+                      <p className="text-sm text-gray-600">תרגול עדין להכנה לשינה</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-5 rounded-lg shadow-md">
+                <h3 className="font-bold text-xl mb-4 text-blue-700">📅 לוח זמנים שבועי מומלץ:</h3>
+                
+                <div className="space-y-4">
+                  <div className="p-3 bg-blue-50 rounded-lg border-r-4 border-blue-500">
+                    <strong className="text-blue-800">שלב 1 (שבועות 1-4):</strong>
+                    <div className="text-sm mt-1 space-y-1">
+                      <div>🗓️ <strong>תדירות:</strong> 3 פעמים בשבוע</div>
+                      <div>⏱️ <strong>משך:</strong> 20 דקות</div>
+                      <div>📋 <strong>ימים:</strong> א׳, ד׳, ו׳</div>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-green-50 rounded-lg border-r-4 border-green-500">
+                    <strong className="text-green-800">שלב 2 (שבועות 5-8):</strong>
+                    <div className="text-sm mt-1 space-y-1">
+                      <div>🗓️ <strong>תדירות:</strong> 3-4 פעמים בשבוע</div>
+                      <div>⏱️ <strong>משך:</strong> 30 דקות</div>
+                      <div>📋 <strong>ימים:</strong> א׳, ג׳, ה׳, ש׳</div>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-orange-50 rounded-lg border-r-4 border-orange-500">
+                    <strong className="text-orange-800">שלב 3 (שבועות 9-16):</strong>
+                    <div className="text-sm mt-1 space-y-1">
+                      <div>🗓️ <strong>תדירות:</strong> 4 פעמים בשבוע</div>
+                      <div>⏱️ <strong>משך:</strong> 45 דקות</div>
+                      <div>📋 <strong>ימים:</strong> א׳, ג׳, ה׳, א׳</div>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-purple-50 rounded-lg border-r-4 border-purple-500">
+                    <strong className="text-purple-800">שלב 4 (שבועות 17-24):</strong>
+                    <div className="text-sm mt-1 space-y-1">
+                      <div>🗓️ <strong>תדירות:</strong> 4-5 פעמים בשבוע</div>
+                      <div>⏱️ <strong>משך:</strong> 60 דקות</div>
+                      <div>📋 <strong>ימים:</strong> א׳, ב׳, ד׳, ו׳, א׳</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-5 rounded-lg shadow-md">
+              <h3 className="font-bold text-xl mb-4 text-red-700">⚠️ מתי לא מומלץ לתרגל?</h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-bold mb-2 text-red-600">הימנע מתרגול:</h4>
+                  <ul className="space-y-1 text-sm">
+                    <li className="flex gap-2"><span className="text-red-500">•</span>2-3 שעות אחרי ארוחה גדולה</li>
+                    <li className="flex gap-2"><span className="text-red-500">•</span>כשאתה חולה או עם חום</li>
+                    <li className="flex gap-2"><span className="text-red-500">•</span>בזמן כאבים חריפים</li>
+                    <li className="flex gap-2"><span className="text-red-500">•</span>בזמן מתח רגשי קיצוני</li>
+                    <li className="flex gap-2"><span className="text-red-500">•</span>אחרי צריכת אלכוהול</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-bold mb-2 text-green-600">תרגול עדין מותר:</h4>
+                  <ul className="space-y-1 text-sm">
+                    <li className="flex gap-2"><span className="text-green-500">•</span>כאבי גב קלים (עם התאמות)</li>
+                    <li className="flex gap-2"><span className="text-green-500">•</span>מתח יומיומי</li>
+                    <li className="flex gap-2"><span className="text-green-500">•</span>עייפות קלה</li>
+                    <li className="flex gap-2"><span className="text-green-500">•</span>לחץ נפשי (דווקא עוזר!)</li>
+                    <li className="flex gap-2"><span className="text-green-500">•</span>אחרי יום ישיבה ארוך</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Instructions */}
+        {!sessionInProgress && (
+          <div className="bg-gradient-to-r from-blue-100 to-purple-100 p-6 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-bold mb-4 text-center">המדריך לתרגול הוליסטי</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="font-bold text-lg mb-3 text-blue-800">מבנה הסשנים:</h3>
+                <ul className="space-y-2">
+                  <li className="flex gap-3">
+                    <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold flex-shrink-0">1</span>
+                    <span><strong>פתיחה:</strong> מרכוז והכנה מנטלית</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold flex-shrink-0">2</span>
+                    <span><strong>חימום:</strong> הכנת הגוף לתרגול</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="bg-orange-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold flex-shrink-0">3</span>
+                    <span><strong>שיא:</strong> התנוחות העיקריות</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold flex-shrink-0">4</span>
+                    <span><strong>סיום:</strong> רגיעה ואינטגרציה</span>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-bold text-lg mb-3 text-purple-800">עקרונות התרגול:</h3>
+                <ul className="space-y-2">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span>התקדם בקצב שלך - אל תמהר</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span>נשום עמוק ורגוע בכל תנוחה</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span>שמור על מודעות למה שקורה בגוף</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span>השתמש בכלי עזר כשנדרש</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span>סיים תמיד ברגיעה מלאה</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="mt-6 p-4 bg-green-50 rounded-lg border-2 border-green-200">
+              <h3 className="font-bold text-lg text-green-800 mb-2 text-center">✅ המערכת מוכנה לחלוטין!</h3>
+              <p className="text-center text-green-700">
+                כל הסשנים בנויים, מתוזמנים ומוכנים לתרגול. בחר את השלב שלך והתחל עכשיו! 🧘‍♂️
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Quick Access Timer */}
+        <div className="fixed bottom-4 left-4 bg-white p-4 rounded-lg shadow-lg border">
+          <h3 className="font-bold text-center mb-2 text-sm">טיימר מהיר</h3>
+          <div className="text-2xl font-mono text-center mb-2">{formatTime(timeElapsed)}</div>
+          <div className="flex gap-2 justify-center">
+            <button
+              onClick={() => setIsTimerRunning(!isTimerRunning)}
+              className={`p-2 rounded ${isTimerRunning ? 'bg-red-500' : 'bg-green-500'} text-white`}
+            >
+              {isTimerRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+            </button>
+            <button
+              onClick={resetTimer}
+              className="p-2 rounded bg-gray-500 text-white"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default IyengarYogaApp;
