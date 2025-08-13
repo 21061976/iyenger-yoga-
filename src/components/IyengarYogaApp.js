@@ -3,12 +3,6 @@ import {
   Play, 
   Pause, 
   RotateCcw, 
-  ChevronRight, 
-  ChevronLeft, 
-  Clock, 
-  User, 
-  Target, 
-  AlertCircle, 
   CheckCircle, 
   PlayCircle 
 } from 'lucide-react';
@@ -16,10 +10,8 @@ import {
 const IyengarYogaApp = () => {
   const [currentStage, setCurrentStage] = useState(1);
   const [currentSession, setCurrentSession] = useState(null);
-  const [currentPose, setCurrentPose] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timeElapsed, setTimeElapsed] = useState(0);
-  const [selectedPose, setSelectedPose] = useState(null);
   const [sessionInProgress, setSessionInProgress] = useState(false);
 
   const stages = {
