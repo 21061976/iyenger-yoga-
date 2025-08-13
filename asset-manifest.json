@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/iyenger-yoga-/static/css/main.b5be1222.css",
+    "main.js": "/iyenger-yoga-/static/js/main.3e6ea319.js",
+    "index.html": "/iyenger-yoga-/index.html",
+    "main.b5be1222.css.map": "/iyenger-yoga-/static/css/main.b5be1222.css.map",
+    "main.3e6ea319.js.map": "/iyenger-yoga-/static/js/main.3e6ea319.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.b5be1222.css",
+    "static/js/main.3e6ea319.js"
+  ]
+}
